@@ -112,9 +112,27 @@ function renderSuggestions(suggestions) {
     suggestionsList.classList.add("visible");
 }
 
-function chooseSuggestion(suggestion) {
+async function chooseSuggestion(suggestion) {
     searchInput.value = suggestion;
     clearSuggestions();
+
+    try {
+        await recordSearch(suggestion);
+    } catch (error) {
+        console.error("Could not record search", error);
+    }
+}
+
+async function recordSearch(term) {
+    await fetch(`${API_BASE_URL}/record-search`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            term: term
+        })
+    });
 }
 
 function showMessage(message) {

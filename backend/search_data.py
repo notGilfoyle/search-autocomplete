@@ -1,5 +1,5 @@
 SEARCH_TERMS = [
-    ("iphone", 50),
+    ("iphone", 98),
     ("iphone 15", 100),
     ("iphone case", 80),
     ("ipad", 70),

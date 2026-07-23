@@ -37,10 +37,42 @@ class AutocompleteHandler(BaseHTTPRequestHandler):
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_cors_headers()
         self.send_header("Content-Length", len(response_body))
         self.end_headers()
         self.wfile.write(response_body)
+
+    def send_cors_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def do_POST(self):
+        parsed_url = urlparse(self.path)
+
+        if parsed_url.path == "/record-search":
+            content_length = int(self.headers.get("Content-Length", 0))
+            request_body = self.rfile.read(content_length)
+            data = json.loads(request_body)
+
+            term = data.get("term", "").strip()
+            was_updated = autocomplete_trie.increment_frequency(term)
+
+            response = {
+                "term": term,
+                "updated": was_updated
+            }
+
+            self.send_json_response(response)
+            return
+
+        self.send_error(404, "Not Found")
+
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_cors_headers()
+        self.end_headers()
 
 
 def run_server():

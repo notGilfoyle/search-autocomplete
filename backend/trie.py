@@ -58,3 +58,18 @@ class Trie:
 
         for child_node in node.children.values():
             self._collect_terms(child_node, results)
+
+    def increment_frequency(self, term):
+        current_node = self.root
+
+        for character in term:
+            if character not in current_node.children:
+                return False
+
+            current_node = current_node.children[character]
+
+        if not current_node.is_end_of_term:
+            return False
+
+        current_node.frequency += 1
+        return True
