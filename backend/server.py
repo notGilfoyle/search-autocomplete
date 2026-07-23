@@ -2,6 +2,15 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse, parse_qs
 
+from trie import Trie
+from search_data import SEARCH_TERMS
+
+
+autocomplete_trie = Trie()
+
+for term, frequency in SEARCH_TERMS:
+    autocomplete_trie.insert(term, frequency)
+
 
 class AutocompleteHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -11,9 +20,11 @@ class AutocompleteHandler(BaseHTTPRequestHandler):
             query_params = parse_qs(parsed_url.query)
             prefix = query_params.get("prefix", [""])[0]
 
+            suggestions = autocomplete_trie.autocomplete(prefix)
+
             response = {
                 "prefix": prefix,
-                "suggestions": []
+                "suggestions": suggestions
             }
 
             self.send_json_response(response)
