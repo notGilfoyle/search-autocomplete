@@ -76,3 +76,16 @@ h1 {
 .suggestion-item:hover {
     background: #f1f5f9;
 }
+
+.suggestion-item.selected {
+    background: #dbeafe;
+}
+
+.suggestion-item.message {
+    color: #64748b;
+    cursor: default;
+}
+
+.suggestion-item.message:hover {
+    background: white;
+}
