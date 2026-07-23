@@ -7,6 +7,7 @@ from search_data import SEARCH_TERMS
 
 
 autocomplete_trie = Trie()
+autocomplete_cache = {}
 
 for term, frequency in SEARCH_TERMS:
     autocomplete_trie.insert(term, frequency)
@@ -20,11 +21,24 @@ class AutocompleteHandler(BaseHTTPRequestHandler):
             query_params = parse_qs(parsed_url.query)
             prefix = query_params.get("prefix", [""])[0]
 
-            suggestions = autocomplete_trie.autocomplete(prefix)
+            debug = query_params.get("debug", ["false"])[0] == "true"
+            cache_key = f"{prefix}:debug={debug}"
+
+            if cache_key in autocomplete_cache:
+                suggestions = autocomplete_cache[cache_key]
+                cache_hit = True
+            else:
+                suggestions = autocomplete_trie.autocomplete(
+                    prefix,
+                    include_frequencies=debug
+                )
+                autocomplete_cache[cache_key] = suggestions
+                cache_hit = False
 
             response = {
                 "prefix": prefix,
-                "suggestions": suggestions
+                "suggestions": suggestions,
+                "cache_hit": cache_hit
             }
 
             self.send_json_response(response)
@@ -57,6 +71,8 @@ class AutocompleteHandler(BaseHTTPRequestHandler):
 
             term = data.get("term", "").strip()
             was_updated = autocomplete_trie.increment_frequency(term)
+            if was_updated:
+                autocomplete_cache.clear()
 
             response = {
                 "term": term,

@@ -23,7 +23,7 @@ class Trie:
         current_node.term = term
         current_node.frequency = frequency
 
-    def autocomplete(self, prefix, limit=5):
+    def autocomplete(self, prefix, limit=5, include_frequencies=False):
         prefix_node = self._find_prefix_node(prefix)
 
         if prefix_node is None:
@@ -35,6 +35,9 @@ class Trie:
         results.sort(key=lambda item: item["frequency"], reverse=True)
 
         top_results = results[:limit]
+
+        if include_frequencies:
+            return top_results
 
         return [item["term"] for item in top_results]
 
